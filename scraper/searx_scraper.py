@@ -1,6 +1,8 @@
 from typing import List, Set, Optional
 from urllib.parse import quote_plus
 import os
+import random
+import time
 
 from playwright.sync_api import sync_playwright
 from .utils import stable_sleep, is_pdf_url, head_is_pdf, USER_AGENT
@@ -26,11 +28,25 @@ def fetch_result_links(url: str, max_results: int = 100, timeout_ms: int = 30000
             seen.add(href)
             links.append(href)
 
+    # Add random delay to avoid rate limiting
+    time.sleep(random.uniform(2, 5))
+    
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
         context = browser.new_context(user_agent=USER_AGENT, ignore_https_errors=ignore_https_errors)
         page = context.new_page()
         page.set_default_timeout(timeout_ms)
+        
+        # Add extra headers to look more like a real browser
+        page.set_extra_http_headers({
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1"
+        })
+        
         page.goto(url)
 
         # Initial collect

@@ -147,6 +147,7 @@ def main(argv: List[str]) -> int:
             ensure_directory(local_debug_dir)
 
         print(f"[Job {idx}/{len(jobs)}] Visiting search page and auto-scrolling...")
+        print(f"[Job {idx}/{len(jobs)}] Search URL: {url}")
         result_links = fetch_result_links(
             url,
             max_results=args.max_results,
